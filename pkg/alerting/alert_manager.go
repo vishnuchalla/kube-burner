@@ -63,6 +63,7 @@ type alert struct {
 	Description string        `json:"description"`
 	MetricName  string        `json:"metricName"`
 	ChurnMetric bool          `json:"churnMetric,omitempty"`
+	Metadata    interface{}   `json:"metadata,omitempty"`
 }
 
 // AlertManager configuration
@@ -71,6 +72,7 @@ type AlertManager struct {
 	prometheus   *prometheus.Prometheus
 	indexer      *indexers.Indexer
 	uuid         string
+	metadata     interface{}
 }
 
 var baseTemplate = []string{
@@ -84,12 +86,13 @@ type descriptionTemplate struct {
 }
 
 // NewAlertManager creates a new alert manager
-func NewAlertManager(alertProfileCfg, uuid string, prometheusClient *prometheus.Prometheus, embedConfig bool, indexer *indexers.Indexer) (*AlertManager, error) {
+func NewAlertManager(alertProfileCfg, uuid string, prometheusClient *prometheus.Prometheus, embedConfig bool, indexer *indexers.Indexer, metadata interface{}) (*AlertManager, error) {
 	log.Infof("🔔 Initializing alert manager for prometheus: %v", prometheusClient.Endpoint)
 	a := AlertManager{
 		prometheus: prometheusClient,
 		uuid:       uuid,
 		indexer:    indexer,
+		metadata:   metadata,
 	}
 	if err := a.readProfile(alertProfileCfg, embedConfig); err != nil {
 		return &a, err
@@ -101,18 +104,19 @@ func (a *AlertManager) readProfile(alertProfileCfg string, embedConfig bool) err
 	var f io.Reader
 	var err error
 	if embedConfig {
-		embededLocation := path.Join(path.Dir(a.prometheus.ConfigSpec.EmbedFSDir), alertProfileCfg)
-		f, err = util.ReadEmbedConfig(a.prometheus.ConfigSpec.EmbedFS, embededLocation)
+		embeddedLocation := path.Join(path.Dir(a.prometheus.ConfigSpec.EmbedFSDir), alertProfileCfg)
+		f, err = util.ReadEmbedConfig(a.prometheus.ConfigSpec.EmbedFS, embeddedLocation)
 		if err != nil {
-			log.Info("Embedded config doesn't contain alert profile. Falling back to original path")
+			log.Infof("Embedded config doesn't contain alert profile %s. Falling back to original path", embeddedLocation)
 			f, err = util.ReadConfig(alertProfileCfg)
+		} else {
+			alertProfileCfg = embeddedLocation
 		}
-		alertProfileCfg = embededLocation
 	} else {
 		f, err = util.ReadConfig(alertProfileCfg)
 	}
 	if err != nil {
-		log.Fatalf("Error reading alert profile %s: %s", alertProfileCfg, err)
+		return fmt.Errorf("error reading alert profile %s: %s", alertProfileCfg, err)
 	}
 	yamlDec := yaml.NewDecoder(f)
 	yamlDec.KnownFields(true)
@@ -153,6 +157,7 @@ func (a *AlertManager) Evaluate(job prometheus.Job) error {
 		}
 		for _, alertSet := range alertData {
 			alertSet.UUID = a.uuid
+			alertSet.Metadata = a.metadata
 			alertList = append(alertList, alertSet)
 		}
 	}
