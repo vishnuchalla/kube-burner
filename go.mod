@@ -14,7 +14,7 @@ require (
 	github.com/prometheus/common v0.62.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
-	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
 	golang.org/x/time v0.10.0
 	gonum.org/v1/gonum v0.15.1
 	gopkg.in/yaml.v3 v3.0.1
