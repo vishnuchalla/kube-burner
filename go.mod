@@ -1,6 +1,6 @@
 module github.com/kube-burner/kube-burner/v2
 
-go 1.23.0
+go 1.24.0
 
 require (
 	dario.cat/mergo v1.0.1
@@ -16,7 +16,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
-	golang.org/x/time v0.10.0
+	golang.org/x/time v0.14.0
 	gonum.org/v1/gonum v0.15.1
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.31.1
