@@ -3,7 +3,7 @@ module github.com/kube-burner/kube-burner/v2
 go 1.23.0
 
 require (
-	dario.cat/mergo v1.0.1
+	dario.cat/mergo v1.0.2
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/cloud-bulldozer/go-commons/v2 v2.2.0
 	github.com/google/uuid v1.6.0
